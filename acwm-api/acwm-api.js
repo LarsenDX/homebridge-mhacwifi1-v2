@@ -123,7 +123,8 @@ class IntesisACWM {
             this.getDataPointValue(apiSignals['vanesUpDown'].uid)
                 .then(result => {
                     log(`Got the value: ${result.value}`)
-                    resolve (result.value)
+                    let swingMode = ~~( result.value === apiSignals['vanesUpDown']['values']['swing'] ) // ~~ turns bool to int
+                    resolve (swingMode)
                 })
                 .catch(error => reject(error))
         })
@@ -235,7 +236,9 @@ class IntesisACWM {
         })
     }
     
-    setSwingMode (value, log) {
+    setSwingMode (swingMode, vanePosition, log) {
+        //set to 10 if swing on, set to configured vane position if swing off
+        var value = swingMode ? apiSignals['vanesUpDown']['values']['swing'] : vanePosition
         return new Promise((resolve, reject) => {
             this.setDataPointValue(apiSignals['vanesUpDown'].uid, value)
                 .then(result => {
@@ -246,6 +249,16 @@ class IntesisACWM {
         })
     }
     
+    setLockPhysicalControls (value, log) {
+        return new Promise((resolve, reject) => {
+            this.setDataPointValue(apiSignals['parental'].uid, value)
+                .then(result => {
+                    log(`Successfully set value for parental: `, value)
+                    resolve (null)
+                })
+                .catch(error => reject(error))
+        })
+    }
 
     // Enable a retry mechanism for the writeCommand operation, which can intermittently fail on ECONNRESET
     wait(ms) { return new Promise(r => setTimeout(r, ms)) };

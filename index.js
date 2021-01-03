@@ -1,5 +1,5 @@
 /* MIT License
-Copyright (c) 2020 Laurent Baum (larsendx)
+Copyright (c) 2020 Laurent Baum (LarsenDX)
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -29,7 +29,8 @@ const MODEL = 'MH-AC-WIFI-1'
 const MINTEMPSETPOINT = 18
 const MAXTEMPSETPOINT = 30
 const MINROTATIONSPEED = 0
-const MAXROTATIONSPEED = 4
+const MAXROTATIONSPEED = 100
+const STEPROTATIONSPEED = 25
 
 //ACWM MODE values
 const AUTO = 0
@@ -37,8 +38,6 @@ const HEAT = 1
 const DRY = 2
 const FAN = 3
 const COOL = 4
-//ACWM SWINGMODE value
-const SWINGMODE = 10
 
 
 module.exports = (api) => {
@@ -78,7 +77,7 @@ class MhiAcAccessory {
         this.ip=config['ip'];
         this.displayName=config['name'];
         this.vanePosition=config['vaneposition'] || 1;
-        this.mode = 0 // start off with AUTO
+        this.mode = AUTO // start off with AUTO, can be AUTO 0, HEAT 1, DRY 2, FAN 3, COOL 4
 
         // Intesis (=MHI supplier) LAN API
         this.vendorApi = new acwmApi(this.ip, this.username, this.password);
@@ -119,7 +118,7 @@ class MhiAcAccessory {
             .setProps({
                 minValue: MINROTATIONSPEED,
                 maxValue: MAXROTATIONSPEED,
-                minStep: 1
+                minStep: STEPROTATIONSPEED
             })
             .on('get', callback => { this.updateHomeKit('HeaterCoolerService','RotationSpeed',callback) })
             .on('set', (value, callback) => { this.updateMHIAC('HeaterCoolerService', 'RotationSpeed', value, callback) })
@@ -164,8 +163,8 @@ class MhiAcAccessory {
         
         this.DehumidifierService.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState)
             .setProps({
-                minValue: 2,
-                maxValue: 2,
+                minValue: Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER,
+                maxValue: Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER,
                 validValues: [Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER]
             })
             .on('get', callback => { this.updateHomeKit('DehumidifierService', 'TargetHumidifierDehumidifierState', callback) })
@@ -175,7 +174,7 @@ class MhiAcAccessory {
             .setProps({
                 minValue: MINROTATIONSPEED,
                 maxValue: MAXROTATIONSPEED,
-                minStep: 1
+                minStep: STEPROTATIONSPEED
             })
             .on('get', callback => { this.updateHomeKit('DehumidifierService','RotationSpeed',callback) })
             .on('set', (value, callback) => { this.updateMHIAC('DehumidifierService', 'RotationSpeed', value, callback) })
@@ -204,7 +203,7 @@ class MhiAcAccessory {
             .setProps({
                 minValue: MINROTATIONSPEED,
                 maxValue: MAXROTATIONSPEED,
-                minStep: 1
+                minStep: STEPROTATIONSPEED
             })
             .on('get', callback => { this.updateHomeKit('FanService','RotationSpeed',callback) })
             .on('set', (value, callback) => { this.updateMHIAC('FanService', 'RotationSpeed', value, callback) })
@@ -297,7 +296,8 @@ class MhiAcAccessory {
         
         //RotationSpeed
         if ( characteristicName === 'RotationSpeed' ) {
-            this.vendorApi.setRotationSpeed(value, this.log)
+            let rSpeed = parseInt(value / STEPROTATIONSPEED) // 0 - 100 div 25
+            this.vendorApi.setRotationSpeed(rSpeed, this.log)
             .then(result => {
                 callback(null)
             })
@@ -309,8 +309,7 @@ class MhiAcAccessory {
         
         //SwingMode
         if ( characteristicName === 'SwingMode' ) {
-            let swingMode = value ? SWINGMODE : this.vanePosition //set to 10 if swing on, set to configured vane position if swing off
-            this.vendorApi.setSwingMode(swingMode, this.log)
+            this.vendorApi.setSwingMode(value, this.vanePosition, this.log)
             .then(result => { // make sure all HomeKit services are upToDate
                 this.updateValue(this.HeaterCoolerService,'SwingMode',value)
                 this.updateValue(this.DehumidifierService,'SwingMode',value)
@@ -323,9 +322,29 @@ class MhiAcAccessory {
             })
         }
         
+        //LockPhysicalControls
+        if ( characteristicName === 'LockPhysicalControls' ) {
+            this.vendorApi.setLockPhysicalControls(value, this.log)
+            .then(result => { // make sure all HomeKit services are upToDate
+                this.updateValue(this.HeaterCoolerService,'LockPhysicalControls',value)
+                this.updateValue(this.DehumidifierService,'LockPhysicalControls',value)
+                this.updateValue(this.FanService,'LockPhysicalControls',value)
+                callback(null)
+            })
+            .catch(error => {
+                this.log(`Error occured while setting value for ${characteristicName}: ${error}`)
+                callback(error)
+            })
+        }
+        
+        //TargetHumidifierDehumidifierState - nothing to do here
+        if ( characteristicName === 'TargetHumidifierDehumidifierState' ) {
+            callback(null)
+        }
+        
     }
     
-    updateHomeKit(serviceName, characteristicName, callback) {
+    updateHomeKit (serviceName, characteristicName, callback) {
         this.log(`Update HomeKit: ${serviceName} ${characteristicName}`)
         
         //get the AC mode every time and use it below in the checks
@@ -334,7 +353,7 @@ class MhiAcAccessory {
         
         if ( characteristicName === 'Active' ) {
         
-        //on very Active call, retrieve the Mode as well
+        //on every Active call, retrieve the Mode as well
         this.vendorApi.getMode(this.log)
             .then(mode => {
                 this.log(`Successfully retrieved value for mode: ${mode}`)
@@ -356,7 +375,7 @@ class MhiAcAccessory {
                 }
                 else { // AC is active
                     switch (this.mode) { // check the AC mode in order to see what switches need flipping in HomeKit
-                            case 0: //AUTO
+                            case AUTO:
                                 this.log("We're in AUTO")
                                 this.updateValue(this.HeaterCoolerService,'Active',Characteristic.Active.ACTIVE)
                                 this.updateValue(this.DehumidifierService,'Active',Characteristic.Active.INACTIVE)
@@ -368,7 +387,7 @@ class MhiAcAccessory {
                                     callback(null, Characteristic.Active.INACTIVE)
                                 }
                                 break;
-                            case 1: //HEAT
+                            case HEAT:
                                 this.log("We're in HEAT")
                                 this.updateValue(this.HeaterCoolerService,'Active',Characteristic.Active.ACTIVE)
                                 this.updateValue(this.DehumidifierService,'Active',Characteristic.Active.INACTIVE)
@@ -380,7 +399,7 @@ class MhiAcAccessory {
                                     callback(null, Characteristic.Active.INACTIVE)
                                 }
                                 break;
-                            case 2: //DRY
+                            case DRY:
                                 this.log("We're in DRY")
                                 this.updateValue(this.DehumidifierService,'Active',Characteristic.Active.ACTIVE)
                                 this.updateValue(this.FanService,'Active',Characteristic.Active.INACTIVE)
@@ -392,7 +411,7 @@ class MhiAcAccessory {
                                     callback(null, Characteristic.Active.INACTIVE)
                                 }
                                 break;
-                            case 3: //FAN
+                            case FAN:
                                 this.log("We're in FAN")
                                 this.updateValue(this.FanService,'Active',Characteristic.Active.ACTIVE)
                                 this.updateValue(this.DehumidifierService,'Active',Characteristic.Active.INACTIVE)
@@ -404,7 +423,7 @@ class MhiAcAccessory {
                                     callback(null, Characteristic.Active.INACTIVE)
                                 }
                                 break;
-                            case 4: // COOL
+                            case COOL:
                                 this.log("We're in COOL")
                                 this.updateValue(this.HeaterCoolerService,'Active',Characteristic.Active.ACTIVE)
                                 this.updateValue(this.FanService,'Active',Characteristic.Active.INACTIVE)
@@ -433,10 +452,10 @@ class MhiAcAccessory {
             this.vendorApi.getSwingMode(this.log)
                 .then(swingMode => {
                     this.log(`Successfully retrieved value for ${characteristicName}: ${swingMode}`)
-                    this.updateValue(this.HeaterCoolerService,'SwingMode',this.acwmApiToHomeKitMap['SwingMode'][swingMode])
-                    this.updateValue(this.DehumidifierService,'SwingMode',this.acwmApiToHomeKitMap['SwingMode'][swingMode])
-                    this.updateValue(this.FanService,'SwingMode',this.acwmApiToHomeKitMap['SwingMode'][swingMode])
-                    callback(null, this.acwmApiToHomeKitMap['SwingMode'][swingMode])
+                    this.updateValue(this.HeaterCoolerService,'SwingMode',swingMode)
+                    this.updateValue(this.DehumidifierService,'SwingMode',swingMode)
+                    this.updateValue(this.FanService,'SwingMode',swingMode)
+                    callback(null, swingMode)
                 })
                 .catch(error => {
                     this.log(`Error occured while getting value for ${characteristicName}: ${error}`)
@@ -447,6 +466,7 @@ class MhiAcAccessory {
         if ( characteristicName === 'RotationSpeed' ) {
             this.vendorApi.getRotationSpeed(this.log)
                 .then(rotationSpeed => {
+                    let rSpeed = rotationSpeed * STEPROTATIONSPEED // [1,2,3,4] * 25
                     this.log(`Successfully retrieved value for ${characteristicName}: ${rotationSpeed}`)
                     this.updateValue(this.HeaterCoolerService,'RotationSpeed',rotationSpeed)
                     this.updateValue(this.DehumidifierService,'RotationSpeed',rotationSpeed)
@@ -492,19 +512,19 @@ class MhiAcAccessory {
         //if ( characteristicName === 'TargetHeaterCoolerState' || characteristicName === 'CurrentHeaterCoolerState') {
         if ( characteristicName === 'TargetHeaterCoolerState' ) {
             switch (this.mode) {
-                    case 0: //AUTO
+                    case AUTO:
                         callback(null, Characteristic.TargetHeaterCoolerState.AUTO)
                         break;
-                    case 1: //HEAT
+                    case HEAT:
                         callback(null, Characteristic.TargetHeaterCoolerState.HEAT)
                         break;
-                    case 2: //DRY
+                    case DRY:
                         callback(null, Characteristic.TargetHeaterCoolerState.AUTO)
                         break;
-                    case 3: //FAN
+                    case FAN:
                         callback(null, Characteristic.TargetHeaterCoolerState.AUTO)
                         break;
-                    case 4: //COOL
+                    case COOL:
                         callback(null, Characteristic.TargetHeaterCoolerState.COOL)
                         break;
             }
@@ -512,19 +532,19 @@ class MhiAcAccessory {
         
         if ( characteristicName === 'CurrentHeaterCoolerState' ) {
             switch (this.mode) {
-                    case 0: //AUTO
+                    case AUTO:
                         callback(null, Characteristic.TargetHeaterCoolerState.COOLING) // needs to have setpoint and currenttemp checked!!!
                         break;
-                    case 1: //HEAT
+                    case HEAT:
                         callback(null, Characteristic.CurrentHeaterCoolerState.HEATING)
                         break;
-                    case 2: //DRY
+                    case DRY:
                         callback(null, Characteristic.CurrentHeaterCoolerState.IDLE)
                         break;
-                    case 3: //FAN
+                    case FAN:
                         callback(null, Characteristic.CurrentHeaterCoolerState.IDLE)
                         break;
-                    case 4: //COOL
+                    case COOL:
                         callback(null, Characteristic.CurrentHeaterCoolerState.COOLING)
                         break;
             }
@@ -542,10 +562,14 @@ class MhiAcAccessory {
                 })
         }
         
-        // disabled for now
         if (characteristicName === 'CurrentHumidifierDehumidifierState') {
-            this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.CurrentHumidifierDehumidifierState.INACTIVE}`)
-            callback(null, Characteristic.CurrentHumidifierDehumidifierState.INACTIVE)
+            //this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.CurrentHumidifierDehumidifierState.INACTIVE}`)
+            if ( this.mode === DRY ) {
+                callback(null, Characteristic.CurrentHumidifierDehumidifierState.DEHUMIDIFYING)
+            }
+            else {
+                callback(null, Characteristic.CurrentHumidifierDehumidifierState.INACTIVE)
+            }
         }
         
         //always DEHUMIDIFIER
