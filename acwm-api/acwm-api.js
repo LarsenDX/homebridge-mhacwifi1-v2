@@ -191,23 +191,58 @@ class IntesisACWM {
     
     
     
-    setActive(value, callback) {
-        this.setDataPointValue(apiSignals['active'].uid, value)
-        .then(info => {
-            this.log(`Successfully set value for active: `, value)
-            callback(null)
-        })
-        .catch(error => {
-            this.log.error(`Error occured while setting value for active to ${value}: `, error)
-            callback(error)
+    setActive(value, log) {
+        return new Promise((resolve, reject) => {
+            this.setDataPointValue(apiSignals['active'].uid, value)
+            .then(result => {
+                log(`Successfully set value for active: `, value)
+                resolve(null)
+            })
+            .catch(error => reject(error))
         })
     }
         
-    setMode (value, callback) {
-        this.setDataPointValue(apiSignals['mode'].uid, value)
-        .then(info => {
-            this.log(`Successfully set value for mode: `, value)
-            callback(null)
+    setMode (value, log) {
+        return new Promise((resolve, reject) => {
+            this.setDataPointValue(apiSignals['mode'].uid, value)
+                .then(result => {
+                    log(`Successfully set value for mode: `, value)
+                    resolve (null)
+                })
+                .catch(error => reject(error))
+        })
+    }
+    
+    setSetPoint (value, log) {
+        return new Promise((resolve, reject) => {
+            this.setDataPointValue(apiSignals['userSetPoint'].uid, value)
+                .then(result => {
+                    log(`Successfully set value for userSetPoint: `, value)
+                    resolve (null)
+                })
+                .catch(error => reject(error))
+        })
+    }
+    
+    setRotationSpeed (value, log) {
+        return new Promise((resolve, reject) => {
+            this.setDataPointValue(apiSignals['speed'].uid, value)
+                .then(result => {
+                    log(`Successfully set value for speed: `, value)
+                    resolve (null)
+                })
+                .catch(error => reject(error))
+        })
+    }
+    
+    setSwingMode (value, log) {
+        return new Promise((resolve, reject) => {
+            this.setDataPointValue(apiSignals['vanesUpDown'].uid, value)
+                .then(result => {
+                    log(`Successfully set value for vanesUpDown: `, value)
+                    resolve (null)
+                })
+                .catch(error => reject(error))
         })
     }
     

@@ -31,6 +31,16 @@ const MAXTEMPSETPOINT = 30
 const MINROTATIONSPEED = 0
 const MAXROTATIONSPEED = 4
 
+//ACWM MODE values
+const AUTO = 0
+const HEAT = 1
+const DRY = 2
+const FAN = 3
+const COOL = 4
+//ACWM SWINGMODE value
+const SWINGMODE = 10
+
+
 module.exports = (api) => {
   api.registerAccessory(PLUGIN_NAME, ACCESSORY_NAME, MhiAcAccessory);
 }
@@ -67,6 +77,7 @@ class MhiAcAccessory {
         this.password=config['password'] || 'operator';
         this.ip=config['ip'];
         this.displayName=config['name'];
+        this.vanePosition=config['vaneposition'] || 1;
         this.mode = 0 // start off with AUTO
 
         // Intesis (=MHI supplier) LAN API
@@ -218,7 +229,100 @@ class MhiAcAccessory {
     
     updateMHIAC(serviceName, characteristicName, value, callback){
         this.log(`Update MHIAC: ${serviceName} ${characteristicName} ${value}`)
-        callback(null)
+        
+        //Active
+        if ( characteristicName === 'Active') {
+            let active = value
+            if ( !active ) { // turn off AC
+                this.vendorApi.setActive(active, this.log)
+                .then(result => {
+                    callback(null)
+                })
+                .catch(error => {
+                    this.log(`Error occured while setting value for ${characteristicName}: ${error}`)
+                    callback(error)
+                })
+            }
+            else { // turn on AC, first figure out what mode to run
+                switch (serviceName) {
+                    case 'HeaterCoolerService':
+                        break
+                    case 'DehumidifierService':
+                        this.vendorApi.setMode(DRY, this.log)
+                        .then(result => { // make sure all HomeKit services are upToDate
+                            this.updateValue(this.HeaterCoolerService,'Active',Characteristic.Active.INACTIVE)
+                            this.updateValue(this.FanService,'Active',Characteristic.Active.INACTIVE)
+                        })
+                        .catch(error => {
+                            this.log(`Error occured while setting value for ${characteristicName}: ${error}`)
+                            callback(error)
+                        })
+                        break
+                    case 'FanService':
+                        this.vendorApi.setMode(FAN, this.log)
+                        .then(result => { // make sure all HomeKit services are upToDate
+                            this.updateValue(this.HeaterCoolerService,'Active',Characteristic.Active.INACTIVE)
+                            this.updateValue(this.DehumidifierService,'Active',Characteristic.Active.INACTIVE)
+                        })
+                        .catch(error => {
+                            this.log(`Error occured while setting value for ${characteristicName}: ${error}`)
+                            callback(error)
+                        })
+                        break
+                }
+                //figured out mode, now turn on
+                this.vendorApi.setActive(active, this.log)
+                .then(result => {
+                    callback(null)
+                })
+                .catch(error => {
+                    this.log(`Error occured while setting value for ${characteristicName}: ${error}`)
+                    callback(error)
+                })
+            }
+        }
+        
+        
+        //SetPoint
+        if ( characteristicName === 'CoolingThresholdTemperature' || characteristicName === 'HeatingThresholdTemperature' ) {
+            this.vendorApi.setSetPoint(homeKitToAcwmTemp(value), this.log)
+            .then(result => {
+                callback(null)
+            })
+            .catch(error => {
+                this.log(`Error occured while setting value for ${characteristicName}: ${error}`)
+                callback(error)
+            })
+        }
+        
+        //RotationSpeed
+        if ( characteristicName === 'RotationSpeed' ) {
+            this.vendorApi.setRotationSpeed(value, this.log)
+            .then(result => {
+                callback(null)
+            })
+            .catch(error => {
+                this.log(`Error occured while setting value for ${characteristicName}: ${error}`)
+                callback(error)
+            })
+        }
+        
+        //SwingMode
+        if ( characteristicName === 'SwingMode' ) {
+            let swingMode = value ? SWINGMODE : this.vanePosition //set to 10 if swing on, set to configured vane position if swing off
+            this.vendorApi.setSwingMode(swingMode, this.log)
+            .then(result => { // make sure all HomeKit services are upToDate
+                this.updateValue(this.HeaterCoolerService,'SwingMode',value)
+                this.updateValue(this.DehumidifierService,'SwingMode',value)
+                this.updateValue(this.FanService,'SwingMode',value)
+                callback(null)
+            })
+            .catch(error => {
+                this.log(`Error occured while setting value for ${characteristicName}: ${error}`)
+                callback(error)
+            })
+        }
+        
     }
     
     updateHomeKit(serviceName, characteristicName, callback) {
