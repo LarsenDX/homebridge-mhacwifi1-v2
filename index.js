@@ -34,16 +34,6 @@ const MAXROTATIONSPEED = 4
 module.exports = (api) => {
   api.registerAccessory(PLUGIN_NAME, ACCESSORY_NAME, MhiAcAccessory);
 }
-
-/*
-module.exports = function(homebridge) {
-
-  Service = homebridge.hap.Service;
-  Characteristic = homebridge.hap.Characteristic;
-  HomebridgeAPI = homebridge;
-  homebridge.registerAccessory(PLUGIN_NAME, ACCESSORY_NAME, MhiAcAccessory);
-}
-*/
  
 class MhiAcAccessory {
     constructor(log, config, api) {
@@ -237,17 +227,7 @@ class MhiAcAccessory {
         //get the AC mode every time and use it below in the checks
         //let Mode
         //Mode = 3 // FAN TEST
-        /*
-        this.vendorApi.getMode(this.log)
-            .then(mode => {
-                this.log(`Successfully retrieved value for mode: ${mode}`)
-                Mode=mode
-            })
-            .catch(error => {
-                this.log(`Error occured while getting value for ${characteristicName}: ${error}`)
-                callback(error)
-            })
-        */
+        
         if ( characteristicName === 'Active' ) {
         
         //on very Active call, retrieve the Mode as well
@@ -407,21 +387,6 @@ class MhiAcAccessory {
         
         //if ( characteristicName === 'TargetHeaterCoolerState' || characteristicName === 'CurrentHeaterCoolerState') {
         if ( characteristicName === 'TargetHeaterCoolerState' ) {
-            /*
-            this.vendorApi.getMode(this.log)
-                .then(mode => {
-                    this.log(`Successfully retrieved value for ${characteristicName}: ${mode}`)
-                    if (mode === 0 || mode === 1) { //auto or heating
-                        this.updateValue(this.DehumidifierService,'Active',Characteristic.Active.INACTIVE)
-                        this.updateValue(this.FanService,'Active',Characteristic.Active.INACTIVE)
-                        callback(null, mode)
-                    }
-                })
-                .catch(error => {
-                    this.log(`Error occured while getting value for ${characteristicName}: ${error}`)
-                    callback(error)
-                })
-            */
             switch (this.mode) {
                     case 0: //AUTO
                         callback(null, Characteristic.TargetHeaterCoolerState.AUTO)
