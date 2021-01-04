@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 /*
   Copyright (c) 2019 Ramón Baas
@@ -12,8 +12,8 @@
   NodeJS code to control an airconditioner via an Intesis (airconwithme) web server
 */
 
-const http = require('http')
-const zlib = require('zlib')
+const http = require("http");
+const zlib = require("zlib");
 
 
 const apiSignals = {
@@ -60,9 +60,6 @@ const apiSignals = {
     "userSetPoint": {
         "uid":9
     },
-    "currentTemp": {
-        "uid": 10
-    },
     "parental": { // Parental Lock (Remote Disabled)
         "uid": 12,
         "values": {
@@ -79,18 +76,18 @@ const apiSignals = {
     "maxTempSetPoint": {
         "uid": 36
     }
-}
+};
 
 
 class IntesisACWM {
 
     constructor(ip, username, password, auto) {
-        this.ip = ip
-        this.username = username
-        this.password = password
-        this.auto = (auto == null ? true : auto) // auto login
-        this.initDone = false
-        this.session
+        this.ip = ip;
+        this.username = username;
+        this.password = password;
+        this.auto = (auto == null ? true : auto); // auto login
+        this.initDone = false;
+        this.session = null;
     }
 
     
@@ -98,170 +95,173 @@ class IntesisACWM {
     
     getActive (log) {
         return new Promise((resolve, reject) => {
-            this.getDataPointValue(apiSignals['active'].uid)
+            this.getDataPointValue(apiSignals["active"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`)
-                    resolve (result.value)
+                    log(`Got the value: ${result.value}`);
+                    resolve (result.value);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
         
     getMode (log) {
         return new Promise((resolve, reject) => {
-            this.getDataPointValue(apiSignals['mode'].uid)
+            this.getDataPointValue(apiSignals["mode"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`)
-                    resolve (result.value)
+                    log(`Got the value: ${result.value}`);
+                    resolve (result.value);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     getSwingMode (log) {
         return new Promise((resolve, reject) => {
-            this.getDataPointValue(apiSignals['vanesUpDown'].uid)
+            this.getDataPointValue(apiSignals["vanesUpDown"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`)
-                    let swingMode = ~~( result.value === apiSignals['vanesUpDown']['values']['swing'] ) // ~~ turns bool to int
-                    resolve (swingMode)
+                    log(`Got the value: ${result.value}`);
+                    let swingMode = ~~( result.value === apiSignals["vanesUpDown"]["values"]["swing"] ); // ~~ turns bool to int
+                    resolve (swingMode);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     getRotationSpeed (log) {
         return new Promise((resolve, reject) => {
-            this.getDataPointValue(apiSignals['speed'].uid)
+            this.getDataPointValue(apiSignals["speed"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`)
-                    resolve (result.value)
+                    log(`Got the value: ${result.value}`);
+                    resolve (result.value);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     getLockPhysicalControls (log) {
         return new Promise((resolve, reject) => {
-            this.getDataPointValue(apiSignals['parental'].uid)
+            this.getDataPointValue(apiSignals["parental"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`)
-                    resolve (result.value)
+                    log(`Got the value: ${result.value}`);
+                    resolve (result.value);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     getCurrentTemperature (log) {
         return new Promise((resolve, reject) => {
-            this.getDataPointValue(apiSignals['currentTemp'].uid)
+            this.getDataPointValue(apiSignals["currentTemp"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`)
-                    resolve (result.value)
+                    log(`Got the value: ${result.value}`);
+                    resolve (result.value);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     getSetPoint (log) {
         return new Promise((resolve, reject) => {
-            this.getDataPointValue(apiSignals['userSetPoint'].uid)
+            this.getDataPointValue(apiSignals["userSetPoint"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`)
-                    resolve (result.value)
+                    log(`Got the value: ${result.value}`);
+                    resolve (result.value);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
-    
+
+/*
     getMinTempSetPoint (callback) {
-        this.getDataPointValue(apiSignals['minTempSetPoint'].uid)
+        this.getDataPointValue(apiSignals["minTempSetPoint"].uid)
         .then(info => {
-            this.log(`Successfully got minTempSetPoint: ${info.value}`)
-            callback (null, info.value)
-        })
+            this.log(`Successfully got minTempSetPoint: ${info.value}`);
+            callback (null, info.value);
+        });
     }
     
     getMaxTempSetPoint (callback) {
-        this.getDataPointValue(apiSignals['maxTempSetPoint'].uid)
+        this.getDataPointValue(apiSignals["maxTempSetPoint"].uid)
         .then(info => {
-            this.log(`Successfully got maxTempSetPoint: ${info.value}`)
-            callback (null, info.value)
-        })
+            this.log(`Successfully got maxTempSetPoint: ${info.value}`);
+            callback (null, info.value);
+        });
     }
-    
+ */
     
     
     setActive(value, log) {
         return new Promise((resolve, reject) => {
-            this.setDataPointValue(apiSignals['active'].uid, value)
+            this.setDataPointValue(apiSignals["active"].uid, value)
             .then(result => {
-                log(`Successfully set value for active: `, value)
-                resolve(null)
+                log(`Successfully set value for active: `, value);
+                resolve(null);
             })
-            .catch(error => reject(error))
-        })
+            .catch(error => reject(error));
+        });
     }
         
     setMode (value, log) {
         return new Promise((resolve, reject) => {
-            this.setDataPointValue(apiSignals['mode'].uid, value)
+            this.setDataPointValue(apiSignals["mode"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for mode: `, value)
-                    resolve (null)
+                    log(`Successfully set value for mode: `, value);
+                    resolve (null);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     setSetPoint (value, log) {
         return new Promise((resolve, reject) => {
-            this.setDataPointValue(apiSignals['userSetPoint'].uid, value)
+            this.setDataPointValue(apiSignals["userSetPoint"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for userSetPoint: `, value)
-                    resolve (null)
+                    log(`Successfully set value for userSetPoint: `, value);
+                    resolve (null);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     setRotationSpeed (value, log) {
         return new Promise((resolve, reject) => {
-            this.setDataPointValue(apiSignals['speed'].uid, value)
+            this.setDataPointValue(apiSignals["speed"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for speed: `, value)
-                    resolve (null)
+                    log(`Successfully set value for speed: `, value);
+                    resolve (null);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     setSwingMode (swingMode, vanePosition, log) {
         //set to 10 if swing on, set to configured vane position if swing off
-        var value = swingMode ? apiSignals['vanesUpDown']['values']['swing'] : vanePosition
+        var value = swingMode ? apiSignals["vanesUpDown"]["values"]["swing"] : vanePosition;
         return new Promise((resolve, reject) => {
-            this.setDataPointValue(apiSignals['vanesUpDown'].uid, value)
+            this.setDataPointValue(apiSignals["vanesUpDown"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for vanesUpDown: `, value)
-                    resolve (null)
+                    log(`Successfully set value for vanesUpDown: `, value);
+                    resolve (null);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
     
     setLockPhysicalControls (value, log) {
         return new Promise((resolve, reject) => {
-            this.setDataPointValue(apiSignals['parental'].uid, value)
+            this.setDataPointValue(apiSignals["parental"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for parental: `, value)
-                    resolve (null)
+                    log(`Successfully set value for parental: `, value);
+                    resolve (null);
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
 
     // Enable a retry mechanism for the writeCommand operation, which can intermittently fail on ECONNRESET
-    wait(ms) { return new Promise(r => setTimeout(r, ms)) };
+    wait(ms) {
+        return new Promise(r => setTimeout(r, ms));
+    }
 
     retryWriteCommandOperation(cmd, data, delay, times) {
         const thisObject = this;
@@ -277,36 +277,36 @@ class IntesisACWM {
                     }
                     return reject(reason);
                 });
-        })
-    };
+        });
+    }
 
     // init: Get reference information
-    // The file 'data.json' should be accessible on the web server wothout authentication
+    // The file "data.json" should be accessible on the web server wothout authentication
     init() {
         return new Promise((resolve, reject) => {
             const url = {
                 host: this.ip,
-                path: '/js/data/data.json',
-                encoding: 'utf8'
-            }
+                path: "/js/data/data.json",
+                encoding: "utf8"
+            };
             http.get(url, response => {
-                const { statusCode } = response
-                let data = new Buffer.from('')
-                response.on('data', x => { data = Buffer.concat([data, x]) })
-                response.on('end', () => {
+                const { statusCode } = response;
+                let data = new Buffer.from("");
+                response.on("data", x => { data = Buffer.concat([data, x]); });
+                response.on("end", () => {
                     if (statusCode === 200) {
-                        this.ref = JSON.parse(zlib.unzipSync(new Buffer(data, 'utf8')).toString())
-                        this.initDone = true
-                        resolve(this.ref)
+                        this.ref = JSON.parse(zlib.unzipSync(new Buffer(data, "utf8")).toString());
+                        this.initDone = true;
+                        resolve(this.ref);
                     } else {
-                        reject('Cannot load ' + url.path)
+                        reject("Cannot load " + url.path);
                     }
-                })
-                response.on('error', (error) => {
-                    reject(error)
-                })
-            })
-        })
+                });
+                response.on("error", (error) => {
+                    reject(error);
+                });
+            });
+        });
     }
 
     // writeCommand: write a command to the unit via port 80
@@ -316,141 +316,140 @@ class IntesisACWM {
                 const payload = JSON.stringify({
                     command: cmd,
                     data: data
-                })
+                });
                 const options = {
                     hostname: this.ip,
-                    path: '/api.cgi',
-                    method: 'POST',
+                    path: "/api.cgi",
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Content-Length': payload.length
+                        "Content-Type": "application/json",
+                        "Content-Length": payload.length
                     }
-                }
+                };
                 const req = http.request(options, (res) => {
-                    res.on('data', async (d) => {
-                        let result = JSON.parse(d)
-                        result.code = res.statusCode
+                    res.on("data", async (d) => {
+                        let result = JSON.parse(d);
+                        result.code = res.statusCode;
                         //console.log(result)
                         if (result.success) {
-                            resolve(result)
+                            resolve(result);
                         } else { // auto login
-                            if (this.auto && cmd !== 'login' && result.error.code === 1) {
+                            if (this.auto && cmd !== "login" && result.error.code === 1) {
                                 try {
-                                    await this.login()
-                                    data.sessionID = this.session // update session ID
-                                    resolve(this.writeCommand(cmd, data))
+                                    await this.login();
+                                    data.sessionID = this.session; // update session ID
+                                    resolve(this.writeCommand(cmd, data));
                                 } catch (error) {
-                                    reject(error)
+                                    reject(error);
                                 }
                             } else {
-                                reject(result)
+                                reject(result);
                             }
                         }
-                    })
-                })
+                    });
+                });
 
-                req.on('error', (error) => {
-                    reject(error)
-                })
+                req.on("error", (error) => {
+                    reject(error);
+                });
 
-                req.write(payload)
-                req.end()
-            }
-        )
+                req.write(payload);
+                req.end();
+        });
     }
 
     // getInfo: get info about the unit
     // This function does not need autorization
     getInfo() {
         return new Promise((resolve, reject) => {
-            this.writeCommand('getinfo', null)
+            this.writeCommand("getinfo", null)
                 .then(result => {
                     if (result.success) {
-                        this.info = result.data.info
-                        resolve(this.info)
+                        this.info = result.data.info;
+                        resolve(this.info);
                     } else {
-                        reject(result)
+                        reject(result);
                     }
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
 
     // Login to the web interface (most functions need authorization to work)
     // Provide a username and password (default is admin, admin)
     login(username, password) {
         return new Promise((resolve, reject) => {
-            this.writeCommand('login', { username: username || this.username, password: password || this.password })
+            this.writeCommand("login", { username: username || this.username, password: password || this.password })
                 .then(result => {
                     if (result.success) {
-                        this.username = username || this.username
-                        this.password = password || this.password
-                        this.session = result.data.id.sessionID
-                        resolve(result)
+                        this.username = username || this.username;
+                        this.password = password || this.password;
+                        this.session = result.data.id.sessionID;
+                        resolve(result);
                     } else {
-                        reject(result)
+                        reject(result);
                     }
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
 
     // logout: end the session
     logout() {
-        let session = this.session
-        delete this.session
-        return this.writeCommand('logout', { sessionID: session })
+        let session = this.session;
+        delete this.session;
+        return this.writeCommand("logout", { sessionID: session });
     }
 
     // getSession: return the session identifier
     getSession() {
-        return this.session
+        return this.session;
     }
 
     getCurrentConfig() {
         return new Promise((resolve, reject) => {
-            this.writeCommand('getcurrentconfig', { sessionID: this.session })
+            this.writeCommand("getcurrentconfig", { sessionID: this.session })
                 .then(result => {
                     if (result.success) {
-                        resolve(result.data.config)
+                        resolve(result.data.config);
                     } else {
-                        reject(result)
+                        reject(result);
                     }
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
 
     // getAvailableDataPoints: return the list of uids of the datapoints that are supported by this device
     getAvailableDataPoints() {
         return new Promise((resolve, reject) => {
-            this.writeCommand('getavailabledatapoints', { sessionID: this.session })
+            this.writeCommand("getavailabledatapoints", { sessionID: this.session })
                 .then(result => {
                     if (result.success) {
-                        resolve(result.data.dp.datapoints)
+                        resolve(result.data.dp.datapoints);
                     } else {
-                        reject(result)
+                        reject(result);
                     }
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
 
-    // getDataPointValue: get the value of a certain datapoint (use 'null' to get all)
+    // getDataPointValue: get the value of a certain datapoint (use "null" to get all)
     getDataPointValue(uid) {
         return new Promise((resolve, reject) => {
-            /*this.writeCommand('getdatapointvalue', { sessionID: this.session, uid: uid || 'all' })*/
-            this.retryWriteCommandOperation('getdatapointvalue', { sessionID: this.session, uid: uid || 'all' }, 500, 5) // increase delay to 500
-            //this.retryWriteCommandOperation('getdatapointvalue', { sessionID: this.session, uid: uid || 'all' }, 100, 5)
+            /*this.writeCommand("getdatapointvalue", { sessionID: this.session, uid: uid || "all" })*/
+            this.retryWriteCommandOperation("getdatapointvalue", { sessionID: this.session, uid: uid || "all" }, 500, 5) // increase delay to 500
+            //this.retryWriteCommandOperation("getdatapointvalue", { sessionID: this.session, uid: uid || "all" }, 100, 5)
                 .then(result => {
                     if (result.success) {
-                        resolve(result.data.dpval)
+                        resolve(result.data.dpval);
                     } else {
-                        reject(result)
+                        reject(result);
                     }
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
 
     // setDataPointValue:
@@ -467,30 +466,30 @@ class IntesisACWM {
             if (this.dp[uid] !== undefined) {
       
             } else {
-              reject('UID ' + uid + ' not supported')
+              reject("UID " + uid + " not supported")
             }
             */
-            /*this.writeCommand('setdatapointvalue', { sessionID: this.session, uid: uid, value: value })*/
-            this.retryWriteCommandOperation('setdatapointvalue', { sessionID: this.session, uid: uid, value: value }, 100, 5)
+            /*this.writeCommand("setdatapointvalue", { sessionID: this.session, uid: uid, value: value })*/
+            this.retryWriteCommandOperation("setdatapointvalue", { sessionID: this.session, uid: uid, value: value }, 100, 5)
                 .then(result => {
                     if (result.success) {
-                        resolve(result)
+                        resolve(result);
                     } else {
-                        reject(result)
+                        reject(result);
                     }
                 })
-                .catch(error => reject(error))
-        })
+                .catch(error => reject(error));
+        });
     }
 
     // identify: flash the light on de device to identify it
     identify() {
-        return this.writeCommand('identify', { sessionID: this.session })
+        return this.writeCommand("identify", { sessionID: this.session });
     }
 
     // reboot: reboot the device
     reboot() {
-        return writeCommand('reboot', { sessionID: this.session })
+        return this.writeCommand("reboot", { sessionID: this.session });
     }
 
     
@@ -504,4 +503,4 @@ class IntesisACWM {
     // - getaplist { sessionID }
 }
 
-module.exports = IntesisACWM
+module.exports = IntesisACWM;
