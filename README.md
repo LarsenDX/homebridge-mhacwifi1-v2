@@ -11,6 +11,6 @@ homebridge plugin for Mitsubishi Heavy Industries AC equipped with an Intesis MH
 "ip": "192.168.1.10",
 "username": "operator",
 "password": "operator",
-"serialNumber": "026129",
+"serial": "026129",
 "vaneposition":1
 }]
