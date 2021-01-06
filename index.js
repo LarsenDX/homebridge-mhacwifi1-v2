@@ -49,22 +49,6 @@ class MhiAcAccessory {
         Service = api.hap.Service;
         Characteristic = api.hap.Characteristic;
         
-        this.acwmApiToHomeKitMap = {
-            "Mode": {
-                2 : Characteristic.CurrentHeaterCoolerState.IDLE, //dehumidify = DRY
-                3 : Characteristic.CurrentHeaterCoolerState.IDLE, //fan
-                4 : Characteristic.CurrentHeaterCoolerState.COOLING
-            },
-            "SwingMode": {
-                0 : Characteristic.SwingMode.SWING_DISABLED,
-                1 : Characteristic.SwingMode.SWING_DISABLED,
-                2 : Characteristic.SwingMode.SWING_DISABLED,
-                3 : Characteristic.SwingMode.SWING_DISABLED,
-                4 : Characteristic.SwingMode.SWING_DISABLED,
-                10 : Characteristic.SwingMode.SWING_ENABLED,
-            }
-        };
-        
         this.log = log;
         //this.config = config;
         this.api = api; /*homebridge API*/
@@ -244,17 +228,6 @@ class MhiAcAccessory {
                 switch (serviceName) {
                     case "HeaterCoolerService":
                         //don't switch modes here for now
-                        /*
-                        this.vendorApi.setMode(AUTO, this.log)
-                        .then(result => { // make sure all HomeKit services are upToDate
-                            this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
-                            this.updateValue(this.FanService,"Active",Characteristic.Active.INACTIVE);
-                        })
-                        .catch(error => {
-                            this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
-                            callback(error);
-                        });
-                        */
                         break;
                     case "DehumidifierService":
                         this.vendorApi.setMode(DRY, this.log)
