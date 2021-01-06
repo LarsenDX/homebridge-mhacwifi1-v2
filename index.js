@@ -215,14 +215,23 @@ class MhiAcAccessory {
         if ( characteristicName === "Active") {
             let active = value;
             if ( !active ) { // turn off AC
-                this.vendorApi.setActive(active, this.log)
-                .then(result => {
+                //HeaterCooler asks for turn off when the user opens its widget in Home. Don't forward this to MHI when we're in DRY or FAN
+                if ( serviceName === "HeaterCoolerService" && (this.mode === FAN || this.mode === DRY) ) {
+                    this.log(`HeaterCoolerService wants to turn off at this.mode: ${this.mode}`)
                     callback(null);
-                })
-                .catch(error => {
-                    this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
-                    callback(error);
-                });
+                }
+                else // otherwise turn off
+                {
+                    this.log(`${serviceName} wants to turn off at this.mode: ${this.mode}`)
+                    this.vendorApi.setActive(active, this.log)
+                    .then(result => {
+                        callback(null);
+                    })
+                    .catch(error => {
+                        this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                        callback(error);
+                    });
+                }
             }
             else { // turn on AC, first figure out what mode to run
                 switch (serviceName) {
@@ -234,6 +243,7 @@ class MhiAcAccessory {
                         .then(result => { // make sure all HomeKit services are upToDate
                             this.updateValue(this.HeaterCoolerService,"Active",Characteristic.Active.INACTIVE);
                             this.updateValue(this.FanService,"Active",Characteristic.Active.INACTIVE);
+                            this.mode=DRY;
                         })
                         .catch(error => {
                             this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
@@ -245,6 +255,7 @@ class MhiAcAccessory {
                         .then(result => { // make sure all HomeKit services are upToDate
                             this.updateValue(this.HeaterCoolerService,"Active",Characteristic.Active.INACTIVE);
                             this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
+                            this.mode=FAN;
                         })
                         .catch(error => {
                             this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
@@ -295,6 +306,7 @@ class MhiAcAccessory {
                 .then(result => { // make sure all HomeKit services are upToDate
                     this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
                     this.updateValue(this.FanService,"Active",Characteristic.Active.INACTIVE);
+                    this.mode=_mode;
                     callback(null);
                 })
                 .catch(error => {
@@ -623,15 +635,5 @@ class MhiAcAccessory {
                 service.getCharacteristic(Characteristic[characteristicName]).updateValue(newValue);
                 this.log(`Updated "${characteristicName}" for ${service} with NEW VALUE: ${newValue}`);
           }
-    }
-                      
-    acwmToHomeKitTemp (temp) {
-        let rTemp = parseInt(temp) / 10;
-        return rTemp;
-    }
-    
-    homeKitToAcwmTemp (temp, asString = false) {
-        let rTemp = temp * 10;
-        return asString ? `${temp} degrees` : rTemp;
     }
 }
