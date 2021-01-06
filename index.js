@@ -23,8 +23,8 @@ const acwmApi = require("./acwm-api/acwm-api.js");
 //var Service, Characteristic, HomebridgeAPI;
 let Service;
 let Characteristic;
-const PLUGIN_NAME = "homebridge-mhacwifi1"; //"homebridge-mhi-acwm"
-const ACCESSORY_NAME = "MH-AC-WIFI-1"; //"MHI-ACWM-AC"
+const PLUGIN_NAME = "homebridge-mhacwifi1-v2"; // "homebridge-mhacwifi1"
+const ACCESSORY_NAME = "MHI-AC"; // "MH-AC-WIFI-1"
 const MANUFACTURER = "Mitsubishi Heavy Industries";
 const MODEL = "MH-AC-WIFI-1";
 const MINTEMPSETPOINT = 18;
