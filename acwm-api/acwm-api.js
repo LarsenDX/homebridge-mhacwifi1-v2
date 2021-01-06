@@ -90,8 +90,17 @@ class IntesisACWM {
         this.session = null;
     }
 
-    
-    //this.setCallback =  function (c) {callback = c;}
+    // account for API treating temp as 230 intead of 23 degrees
+    normalizeTemp(toFrom, temp) {
+        switch (toFrom) {
+            case "to": //to api
+                return parseInt(temp) * 10;
+            break;
+            case "from":// from api
+                return parseInt(temp) / 10;
+            break;
+        }
+    }
     
     getActive (log) {
         return new Promise((resolve, reject) => {
@@ -154,7 +163,7 @@ class IntesisACWM {
             this.getDataPointValue(apiSignals["currentTemp"].uid)
                 .then(result => {
                     log(`Got the value: ${result.value}`);
-                    resolve (result.value);
+                    resolve (this.normalizeTemp("from", result.value));
                 })
                 .catch(error => reject(error));
         });
@@ -165,7 +174,7 @@ class IntesisACWM {
             this.getDataPointValue(apiSignals["userSetPoint"].uid)
                 .then(result => {
                     log(`Got the value: ${result.value}`);
-                    resolve (result.value);
+                    resolve (this.normalizeTemp("from", result.value));
                 })
                 .catch(error => reject(error));
         });
@@ -214,7 +223,7 @@ class IntesisACWM {
     
     setSetPoint (value, log) {
         return new Promise((resolve, reject) => {
-            this.setDataPointValue(apiSignals["userSetPoint"].uid, value)
+            this.setDataPointValue(apiSignals["userSetPoint"].uid, this.normalizeTemp("to", value))
                 .then(result => {
                     log(`Successfully set value for userSetPoint: `, value);
                     resolve (null);
