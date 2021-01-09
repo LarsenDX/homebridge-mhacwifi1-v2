@@ -379,7 +379,7 @@ class MhiAcAccessory {
     }
     
     updateHomeKit (serviceName, characteristicName, callback) {
-        this.log(`Update HomeKit: ${serviceName} ${characteristicName}`);
+        this.log.debug(`Update HomeKit: ${serviceName} `, characteristicName);
         
         //get the AC mode every time and use it below in the checks
         //let Mode

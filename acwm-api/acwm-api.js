@@ -106,7 +106,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.getDataPointValue(apiSignals["active"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`);
+                    log.debug(`Got the value: `, result.value);
                     resolve (result.value);
                 })
                 .catch(error => reject(error));
@@ -117,7 +117,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.getDataPointValue(apiSignals["mode"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`);
+                    log.debug(`Got the value: `, result.value);
                     resolve (result.value);
                 })
                 .catch(error => reject(error));
@@ -128,7 +128,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.getDataPointValue(apiSignals["vanesUpDown"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`);
+                    log.debug(`Got the value: `, result.value);
                     let swingMode = ~~( result.value === apiSignals["vanesUpDown"]["values"]["swing"] ); // ~~ turns bool to int
                     resolve (swingMode);
                 })
@@ -140,7 +140,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.getDataPointValue(apiSignals["speed"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`);
+                    log.debug(`Got the value: `, result.value);
                     resolve (result.value);
                 })
                 .catch(error => reject(error));
@@ -151,7 +151,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.getDataPointValue(apiSignals["parental"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`);
+                    log.debug(`Got the value: `, result.value);
                     resolve (result.value);
                 })
                 .catch(error => reject(error));
@@ -162,7 +162,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.getDataPointValue(apiSignals["currentTemp"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`);
+                    log.debug(`Got the value: `, result.value);
                     resolve (this.normalizeTemp("from", result.value));
                 })
                 .catch(error => reject(error));
@@ -173,37 +173,19 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.getDataPointValue(apiSignals["userSetPoint"].uid)
                 .then(result => {
-                    log(`Got the value: ${result.value}`);
+                    log.debug(`Got the value: `, result.value);
                     resolve (this.normalizeTemp("from", result.value));
                 })
                 .catch(error => reject(error));
         });
     }
 
-/*
-    getMinTempSetPoint (callback) {
-        this.getDataPointValue(apiSignals["minTempSetPoint"].uid)
-        .then(info => {
-            this.log(`Successfully got minTempSetPoint: ${info.value}`);
-            callback (null, info.value);
-        });
-    }
-    
-    getMaxTempSetPoint (callback) {
-        this.getDataPointValue(apiSignals["maxTempSetPoint"].uid)
-        .then(info => {
-            this.log(`Successfully got maxTempSetPoint: ${info.value}`);
-            callback (null, info.value);
-        });
-    }
- */
-    
-    
+
     setActive(value, log) {
         return new Promise((resolve, reject) => {
             this.setDataPointValue(apiSignals["active"].uid, value)
             .then(result => {
-                log(`Successfully set value for active: `, value);
+                log.debug(`Successfully set value for active: `, value);
                 resolve(null);
             })
             .catch(error => reject(error));
@@ -214,7 +196,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.setDataPointValue(apiSignals["mode"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for mode: `, value);
+                    log.debug(`Successfully set value for mode: `, value);
                     resolve (null);
                 })
                 .catch(error => reject(error));
@@ -225,7 +207,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.setDataPointValue(apiSignals["userSetPoint"].uid, this.normalizeTemp("to", value))
                 .then(result => {
-                    log(`Successfully set value for userSetPoint: `, value);
+                    log.debug(`Successfully set value for userSetPoint: `, value);
                     resolve (null);
                 })
                 .catch(error => reject(error));
@@ -236,7 +218,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.setDataPointValue(apiSignals["speed"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for speed: `, value);
+                    log.debug(`Successfully set value for speed: `, value);
                     resolve (null);
                 })
                 .catch(error => reject(error));
@@ -249,7 +231,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.setDataPointValue(apiSignals["vanesUpDown"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for vanesUpDown: `, value);
+                    log.debug(`Successfully set value for vanesUpDown: `, value);
                     resolve (null);
                 })
                 .catch(error => reject(error));
@@ -260,7 +242,7 @@ class IntesisACWM {
         return new Promise((resolve, reject) => {
             this.setDataPointValue(apiSignals["parental"].uid, value)
                 .then(result => {
-                    log(`Successfully set value for parental: `, value);
+                    log.debug(`Successfully set value for parental: `, value);
                     resolve (null);
                 })
                 .catch(error => reject(error));
