@@ -209,7 +209,7 @@ class MhiAcAccessory {
     }
     
     updateMHIAC(serviceName, characteristicName, value, callback){
-        this.log(`Update MHIAC: ${serviceName} ${characteristicName} ${value}`);
+        this.log.debug(`Update MHIAC: ${serviceName} ${characteristicName} `, value);
         
         //Active
         if ( characteristicName === "Active") {
@@ -217,18 +217,18 @@ class MhiAcAccessory {
             if ( !active ) { // turn off AC
                 //HeaterCooler asks for turn off when the user opens its widget in Home. Don't forward this to MHI when we're in DRY or FAN
                 if ( serviceName === "HeaterCoolerService" && (this.mode === FAN || this.mode === DRY) ) {
-                    this.log(`HeaterCoolerService wants to turn off at this.mode: ${this.mode}`)
+                    this.log.debug(`HeaterCoolerService wants to turn off at this.mode: `, this.mode)
                     callback(null);
                 }
                 else // otherwise turn off
                 {
-                    this.log(`${serviceName} wants to turn off at this.mode: ${this.mode}`)
+                    this.log.debug(`${serviceName} wants to turn off at this.mode: `, this.mode)
                     this.vendorApi.setActive(active, this.log)
                     .then(result => {
                         callback(null);
                     })
                     .catch(error => {
-                        this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                        this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                         callback(error);
                     });
                 }
@@ -246,7 +246,7 @@ class MhiAcAccessory {
                             this.mode=DRY;
                         })
                         .catch(error => {
-                            this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                            this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                             callback(error);
                         });
                         break;
@@ -258,7 +258,7 @@ class MhiAcAccessory {
                             this.mode=FAN;
                         })
                         .catch(error => {
-                            this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                            this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                             callback(error);
                         });
                         break;
@@ -269,7 +269,7 @@ class MhiAcAccessory {
                     callback(null);
                 })
                 .catch(error => {
-                    this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                     callback(error);
                 });
             }
@@ -288,20 +288,20 @@ class MhiAcAccessory {
                               (this.mode === DRY && _dryActive === Characteristic.Active.ACTIVE)))
                         {
                             _mode = AUTO;
-                            this.log(`We're in _mode=AUTO ${_mode}`);
+                            //this.log(`We're in _mode=AUTO ${_mode}`);
                         }
                         break;
                     case Characteristic.TargetHeaterCoolerState.HEAT:
                             _mode = HEAT;
-                            this.log(`We're in _mode=HEAT ${_mode}`);
+                            //this.log(`We're in _mode=HEAT ${_mode}`);
                         break;
                     case Characteristic.TargetHeaterCoolerState.COOL:
                             _mode = COOL;
-                            this.log(`We're in _mode=COOL ${_mode}`);
+                            //this.log(`We're in _mode=COOL ${_mode}`);
                         break;
             }
             
-            this.log(`We're sending this _mode to API ${_mode}`);
+            this.log.debug(`We're sending this _mode to API `, _mode);
             this.vendorApi.setMode(_mode, this.log)
                 .then(result => { // make sure all HomeKit services are upToDate
                     this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
@@ -310,20 +310,20 @@ class MhiAcAccessory {
                     callback(null);
                 })
                 .catch(error => {
-                    this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
         
         //SetPoint
         if ( characteristicName === "CoolingThresholdTemperature" || characteristicName === "HeatingThresholdTemperature" ) {
-            this.log(`Request to set SetPoint to ${value}`)
+            this.log.debug(`Request to set SetPoint to `, value)
             this.vendorApi.setSetPoint(value, this.log)
             .then(result => {
                 callback(null);
             })
             .catch(error => {
-                this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                 callback(error);
             });
         }
@@ -336,7 +336,7 @@ class MhiAcAccessory {
                 callback(null);
             })
             .catch(error => {
-                this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                 callback(error);
             });
         }
@@ -351,7 +351,7 @@ class MhiAcAccessory {
                 callback(null);
             })
             .catch(error => {
-                this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                 callback(error);
             });
         }
@@ -366,7 +366,7 @@ class MhiAcAccessory {
                 callback(null);
             })
             .catch(error => {
-                this.log(`Error occured while setting value for ${characteristicName}: ${error}`);
+                this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                 callback(error);
             });
         }
@@ -390,17 +390,17 @@ class MhiAcAccessory {
         //on every Active call, retrieve the Mode as well
         this.vendorApi.getMode(this.log)
             .then(mode => {
-                this.log(`Successfully retrieved value for mode: ${mode}`);
+                this.log.debug(`Successfully retrieved value for mode: `, mode);
                 this.mode=mode;
             })
             .catch(error => {
-                this.log(`Error occured while getting value for ${characteristicName}: ${error}`);
+                this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                 callback(error);
             });
             
         this.vendorApi.getActive(this.log)
             .then(active => {
-                this.log(`Successfully retrieved value for ${characteristicName}: ${active}`);
+                this.log.debug(`Successfully retrieved value for ${characteristicName}: `, active);
                 if (!active){ // not active, turn everything off in HomeKit
                     this.updateValue(this.HeaterCoolerService,"Active",Characteristic.Active.INACTIVE);
                     this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
@@ -410,7 +410,7 @@ class MhiAcAccessory {
                 else { // AC is active
                     switch (this.mode) { // check the AC mode in order to see what switches need flipping in HomeKit
                             case AUTO:
-                                this.log("We're in AUTO");
+                                //this.log("We're in AUTO");
                                 this.updateValue(this.HeaterCoolerService,"Active",Characteristic.Active.ACTIVE);
                                 this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
                                 this.updateValue(this.FanService,"Active",Characteristic.Active.INACTIVE);
@@ -422,7 +422,7 @@ class MhiAcAccessory {
                                 }
                                 break;
                             case HEAT:
-                                this.log("We're in HEAT");
+                                //this.log("We're in HEAT");
                                 this.updateValue(this.HeaterCoolerService,"Active",Characteristic.Active.ACTIVE);
                                 this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
                                 this.updateValue(this.FanService,"Active",Characteristic.Active.INACTIVE);
@@ -434,7 +434,7 @@ class MhiAcAccessory {
                                 }
                                 break;
                             case DRY:
-                                this.log("We're in DRY");
+                                //this.log("We're in DRY");
                                 this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.ACTIVE);
                                 this.updateValue(this.FanService,"Active",Characteristic.Active.INACTIVE);
                                 this.updateValue(this.HeaterCoolerService,"Active",Characteristic.Active.INACTIVE);
@@ -446,7 +446,7 @@ class MhiAcAccessory {
                                 }
                                 break;
                             case FAN:
-                                this.log("We're in FAN");
+                                //this.log("We're in FAN");
                                 this.updateValue(this.FanService,"Active",Characteristic.Active.ACTIVE);
                                 this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
                                 this.updateValue(this.HeaterCoolerService,"Active",Characteristic.Active.INACTIVE);
@@ -458,7 +458,7 @@ class MhiAcAccessory {
                                 }
                                 break;
                             case COOL:
-                                this.log("We're in COOL");
+                                //this.log("We're in COOL");
                                 this.updateValue(this.HeaterCoolerService,"Active",Characteristic.Active.ACTIVE);
                                 this.updateValue(this.FanService,"Active",Characteristic.Active.INACTIVE);
                                 this.updateValue(this.DehumidifierService,"Active",Characteristic.Active.INACTIVE);
@@ -476,7 +476,7 @@ class MhiAcAccessory {
                 
             })
             .catch(error => {
-                this.log(`Error occured while getting value for ${characteristicName}: ${error}`);
+                this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                 callback(error);
             });
        
@@ -485,14 +485,14 @@ class MhiAcAccessory {
         if ( characteristicName === "SwingMode" ) {
             this.vendorApi.getSwingMode(this.log)
                 .then(swingMode => {
-                    this.log(`Successfully retrieved value for ${characteristicName}: ${swingMode}`);
+                    this.log.debug(`Successfully retrieved value for ${characteristicName}: `, swingMode);
                     this.updateValue(this.HeaterCoolerService,"SwingMode",swingMode);
                     this.updateValue(this.DehumidifierService,"SwingMode",swingMode);
                     this.updateValue(this.FanService,"SwingMode",swingMode);
                     callback(null, swingMode);
                 })
                 .catch(error => {
-                    this.log(`Error occured while getting value for ${characteristicName}: ${error}`);
+                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -501,14 +501,14 @@ class MhiAcAccessory {
             this.vendorApi.getRotationSpeed(this.log)
                 .then(rotationSpeed => {
                     let rSpeed = rotationSpeed * STEPROTATIONSPEED; // [1,2,3,4] * 25
-                    this.log(`Successfully retrieved value for ${characteristicName}: ${rSpeed}`);
+                    this.log.debug(`Successfully retrieved value for ${characteristicName}: `, rSpeed);
                     this.updateValue(this.HeaterCoolerService,"RotationSpeed",rSpeed);
                     this.updateValue(this.DehumidifierService,"RotationSpeed",rSpeed);
                     this.updateValue(this.FanService,"RotationSpeed",rSpeed);
                     callback(null, rSpeed);
                 })
                 .catch(error => {
-                    this.log(`Error occured while getting value for ${characteristicName}: ${error}`);
+                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -516,14 +516,14 @@ class MhiAcAccessory {
         if ( characteristicName === "LockPhysicalControls" ) {
             this.vendorApi.getLockPhysicalControls(this.log)
                 .then(lockPhysicalControls => {
-                    this.log(`Successfully retrieved value for ${characteristicName}: ${lockPhysicalControls}`);
+                    this.log.debug(`Successfully retrieved value for ${characteristicName}: `, lockPhysicalControls);
                     this.updateValue(this.HeaterCoolerService,"LockPhysicalControls",lockPhysicalControls);
                     this.updateValue(this.DehumidifierService,"LockPhysicalControls",lockPhysicalControls);
                     this.updateValue(this.FanService,"LockPhysicalControls",lockPhysicalControls);
                     callback(null, lockPhysicalControls);
                 })
                 .catch(error => {
-                    this.log(`Error occured while getting value for ${characteristicName}: ${error}`);
+                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -531,14 +531,14 @@ class MhiAcAccessory {
         if ( characteristicName == "CoolingThresholdTemperature" || characteristicName === "HeatingThresholdTemperature" ) {
             this.vendorApi.getSetPoint(this.log)
                 .then(SetPoint => {
-                    this.log(`Successfully retrieved value for ${characteristicName}: ${SetPoint}`);
+                    this.log.debug(`Successfully retrieved value for ${characteristicName}: `, SetPoint);
                         if (SetPoint === 3276.8) { // account for bug of ACWM API SetPoint value when in FAN mode
                         SetPoint = 23;// set to 23 degrees
                     }
                     callback(null, SetPoint);
                 })
                 .catch(error => {
-                    this.log(`Error occured while getting value for ${characteristicName}: ${error}`);
+                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -547,23 +547,23 @@ class MhiAcAccessory {
         if ( characteristicName === "TargetHeaterCoolerState" ) {
             switch (this.mode) {
                     case AUTO:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.TargetHeaterCoolerState.AUTO}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.TargetHeaterCoolerState.AUTO);
                         callback(null, Characteristic.TargetHeaterCoolerState.AUTO);
                         break;
                     case HEAT:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.TargetHeaterCoolerState.HEAT}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.TargetHeaterCoolerState.HEAT);
                         callback(null, Characteristic.TargetHeaterCoolerState.HEAT);
                         break;
                     case DRY:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.TargetHeaterCoolerState.AUTO}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.TargetHeaterCoolerState.AUTO);
                         callback(null, Characteristic.TargetHeaterCoolerState.AUTO);
                         break;
                     case FAN:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.TargetHeaterCoolerState.AUTO}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.TargetHeaterCoolerState.AUTO);
                         callback(null, Characteristic.TargetHeaterCoolerState.AUTO);
                         break;
                     case COOL:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.TargetHeaterCoolerState.COOL}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.TargetHeaterCoolerState.COOL);
                         callback(null, Characteristic.TargetHeaterCoolerState.COOL);
                         break;
             }
@@ -572,23 +572,23 @@ class MhiAcAccessory {
         if ( characteristicName === "CurrentHeaterCoolerState" ) {
             switch (this.mode) {
                     case AUTO:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.CurrentHeaterCoolerState.IDLE}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.CurrentHeaterCoolerState.IDLE);
                         callback(null, Characteristic.CurrentHeaterCoolerState.IDLE); // needs to have setpoint and currenttemp checked!!!
                         break;
                     case HEAT:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.CurrentHeaterCoolerState.HEATING}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.CurrentHeaterCoolerState.HEATING);
                         callback(null, Characteristic.CurrentHeaterCoolerState.HEATING);
                         break;
                     case DRY:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.CurrentHeaterCoolerState.IDLE}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.CurrentHeaterCoolerState.IDLE);
                         callback(null, Characteristic.CurrentHeaterCoolerState.IDLE);
                         break;
                     case FAN:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.CurrentHeaterCoolerState.IDLE}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.CurrentHeaterCoolerState.IDLE);
                         callback(null, Characteristic.CurrentHeaterCoolerState.IDLE);
                         break;
                     case COOL:
-                        this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.CurrentHeaterCoolerState.COOLING}`);
+                        this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.CurrentHeaterCoolerState.COOLING);
                         callback(null, Characteristic.CurrentHeaterCoolerState.COOLING);
                         break;
             }
@@ -597,11 +597,11 @@ class MhiAcAccessory {
         if ( characteristicName === "CurrentTemperature" ) {
             this.vendorApi.getCurrentTemperature(this.log)
                 .then(currentTemperature => {
-                    this.log(`Successfully retrieved value for ${characteristicName}: ${currentTemperature}`);
+                    this.log.debug(`Successfully retrieved value for ${characteristicName}: `,currentTemperature);
                     callback(null, currentTemperature);
                 })
                 .catch(error => {
-                    this.log(`Error occured while getting value for ${characteristicName}: ${error}`);
+                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -618,13 +618,13 @@ class MhiAcAccessory {
         
         //always DEHUMIDIFIER
         if (characteristicName === "TargetHumidifierDehumidifierState") {
-            this.log(`Successfully retrieved value for ${characteristicName}: ${Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER}`);
+            this.log.debug(`Successfully retrieved value for ${characteristicName}: `, Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER);
             callback(null, Characteristic.TargetHumidifierDehumidifierState.DEHUMIDIFIER);
         }
         
         // MHI AC does not return hum, always set to 50%
         if ( characteristicName === "CurrentRelativeHumidity") {
-            this.log(`Successfully retrieved value for ${characteristicName}: 50%`);
+            this.log.debug(`Successfully retrieved value for ${characteristicName}: `, "50%");
             callback(null, 50.0);
         }
         
@@ -633,7 +633,7 @@ class MhiAcAccessory {
     updateValue (service, characteristicName, newValue) {
            if (service.getCharacteristic(Characteristic[characteristicName]).value !== newValue) {
                 service.getCharacteristic(Characteristic[characteristicName]).updateValue(newValue);
-                this.log(`Updated "${characteristicName}" for ${service} with NEW VALUE: ${newValue}`);
+                this.log.debug(`Updated "${characteristicName}" for ${service} with NEW VALUE: `, newValue);
           }
     }
 }
