@@ -15,4 +15,4 @@ homebridge plugin for Mitsubishi Heavy Industries AC equipped with an Intesis MH
 "vaneposition":1  
 }]  
   
-Note: It's recommended to name the device Aircon to allow full Siri interaction, especially when a thermostat (e.g. heater) is assigned to the same room.
+Note: It's recommended to name the device *Aircon* to allow full Siri interaction, especially when a thermostat (e.g. heater) is assigned to the same room.
