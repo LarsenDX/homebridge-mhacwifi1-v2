@@ -19,12 +19,10 @@ SOFTWARE. */
 "use strict";
 
 const acwmApi = require("./acwm-api/acwm-api.js");
-//const StateManager = require("./StateManager.js")
-//var Service, Characteristic, HomebridgeAPI;
 let Service;
 let Characteristic;
-const PLUGIN_NAME = "homebridge-mhacwifi1-v2"; // "homebridge-mhacwifi1"
-const ACCESSORY_NAME = "MHI-AC"; // "MH-AC-WIFI-1"
+const PLUGIN_NAME = "homebridge-mhacwifi1-v2";
+const ACCESSORY_NAME = "MHI-AC";
 const MANUFACTURER = "Mitsubishi Heavy Industries";
 const MODEL = "MH-AC-WIFI-1";
 const MINTEMPSETPOINT = 18;
@@ -68,8 +66,6 @@ class MhiAcAccessory {
         this.minTempSetPoint = MINTEMPSETPOINT;
         this.maxTempSetPoint = MAXTEMPSETPOINT;
         
-        //State Manager of this accessory
-        //this.stateManager = require("./StateManager")(this, api);
     
         // HAP AccessoryInformation service
         this.informationService = new Service.AccessoryInformation()
@@ -470,8 +466,6 @@ class MhiAcAccessory {
                                 }
                                 break;
                     }
-                    // if nothing hit in the switch statement, it must be a service to inactivate
-                    //callback(null, Characteristic.Active.INACTIVE)
                 }
                 
             })
