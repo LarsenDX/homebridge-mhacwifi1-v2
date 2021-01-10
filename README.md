@@ -7,7 +7,7 @@ homebridge plugin for Mitsubishi Heavy Industries AC equipped with an Intesis MH
 "accessories": [
 {
 "accessory": "MHI-AC",
-"name": "Living Room AC",
+"name": "Living Room Aircon",
 "ip": "192.168.1.10",
 "username": "operator",
 "password": "operator",
