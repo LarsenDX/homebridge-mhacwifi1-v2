@@ -390,7 +390,7 @@ class MhiAcAccessory {
                 this.mode=mode;
             })
             .catch(error => {
-                this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
+                this.log.error(`Error occured while getting value for ${characteristicName}: `, error);
                 callback(error);
             });
             
@@ -470,7 +470,7 @@ class MhiAcAccessory {
                 
             })
             .catch(error => {
-                this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
+                this.log.error(`Error occured while getting value for ${characteristicName}: `, error);
                 callback(error);
             });
        
@@ -486,7 +486,7 @@ class MhiAcAccessory {
                     callback(null, swingMode);
                 })
                 .catch(error => {
-                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
+                    this.log.error(`Error occured while getting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -502,7 +502,7 @@ class MhiAcAccessory {
                     callback(null, rSpeed);
                 })
                 .catch(error => {
-                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
+                    this.log.error(`Error occured while getting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -517,7 +517,7 @@ class MhiAcAccessory {
                     callback(null, lockPhysicalControls);
                 })
                 .catch(error => {
-                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
+                    this.log.error(`Error occured while getting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -532,7 +532,7 @@ class MhiAcAccessory {
                     callback(null, SetPoint);
                 })
                 .catch(error => {
-                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
+                    this.log.error(`Error occured while getting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
@@ -595,7 +595,7 @@ class MhiAcAccessory {
                     callback(null, currentTemperature);
                 })
                 .catch(error => {
-                    this.log.error(`Error occured while setting value for ${characteristicName}: `, error);
+                    this.log.error(`Error occured while getting value for ${characteristicName}: `, error);
                     callback(error);
                 });
         }
