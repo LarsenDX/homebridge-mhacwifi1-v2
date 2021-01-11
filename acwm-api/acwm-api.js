@@ -92,13 +92,18 @@ class IntesisACWM {
 
     // account for API treating temp as 230 intead of 23 degrees
     normalizeTemp(toFrom, temp) {
+        let _temp = parseInt(temp);
+        if ( _temp === 32768 ) { // account for bug of ACWM API SetPoint value when in FAN mode
+            return 23; // set to 23 degrees
+        }
         switch (toFrom) {
             case "to": //to api
-                return parseInt(temp) * 10;
+                return _temp * 10;
             break;
             case "from":// from api
-                return parseInt(temp) / 10;
+                return _temp / 10;
             break;
+        
         }
     }
     

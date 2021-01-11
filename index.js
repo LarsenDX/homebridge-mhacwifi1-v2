@@ -526,9 +526,6 @@ class MhiAcAccessory {
             this.vendorApi.getSetPoint(this.log)
                 .then(SetPoint => {
                     this.log.debug(`Successfully retrieved value for ${characteristicName}: `, SetPoint);
-                        if (SetPoint === 3276.8) { // account for bug of ACWM API SetPoint value when in FAN mode
-                        SetPoint = 23;// set to 23 degrees
-                    }
                     callback(null, SetPoint);
                 })
                 .catch(error => {
