@@ -16,3 +16,7 @@ homebridge plugin for Mitsubishi Heavy Industries AC equipped with an Intesis MH
 }]  
   
 Note: It's recommended to name the device *Aircon* to allow Siri to better distinguish between the AC and a thermostat (e.g. heater) assigned to the same room.
+  
+Note: vaneposition denotes the default position when SwingMode is disabled.  
+  
+Note: The LAN API does not have a humidity data point. We hardcode it 50% to meet the requirements of the HomeKit  Humidifier Dehumidifier  service.
