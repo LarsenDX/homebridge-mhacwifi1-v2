@@ -19,4 +19,4 @@ Note: It's recommended to name the device *Aircon* to allow Siri to better disti
   
 Note: vaneposition denotes the default position when SwingMode is disabled.  
   
-Note: The LAN API does not have a humidity data point. We hardcode it 50% to meet the requirements of the HomeKit  Humidifier Dehumidifier  service.
+Note: The LAN API does not have a humidity data point. We hardcode it to 50% in order to meet the requirements of the HomeKit  Humidifier Dehumidifier  service.
