@@ -1,6 +1,6 @@
 {
     "name": "homebridge-mhacwifi1-v2",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Homebridge plugin for Mitsubishi Heavy Industries AC equipped with an Intesis MH-AC-WIFI-1 device (LAN API). This plugin implements all supported HomeKit services: Heater Cooler (AUTO, HEAT, COOL), Fanv2 (FAN), and Humidifier Dehumidifier (DRY), including RotationSpeed, SwingMode.",
     "main": "index.js",
     "scripts": {
